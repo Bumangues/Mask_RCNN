@@ -1,0 +1,16 @@
+#ignore images
+.DS_Store
+.idea/*
+
+image_preprocessing/images/*
+image_preprocessing/processed_images_vessel1_Daniel/*
+image_preprocessing/processed_images/*
+
+Mask_RCNN/*
+keras-yolo3/*
+
+project/data/annotations/*
+project/data/images/*
+project/mask_rcnn_coco.h5
+project/.ipynb_checkpoints/*
+

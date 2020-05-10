@@ -1,0 +1,29 @@
+label_l1,label_l2,count
+Albacore,ALB,33943
+Bigeye tuna,BET,2772
+Black marlin,BILL,80
+Blue marlin,BILL,177
+Great barracuda,OTH,76
+Human,HUMAN,104503
+Indo Pacific sailfish,BILL,129
+Long snouted lancetfish,OTH,176
+Mahi mahi,DOL,1112
+Mola mola,OTH,6
+No fish,NoF,1879
+Oilfish,OTH,778
+Opah,LAG,1606
+Pelagic stingray,PLS,40
+Pomfret,OTH,2
+Rainbow runner,OTH,2
+Roudie scolar,OIL,4
+Shark,SHARK,623
+Shortbill spearfish,BILL,142
+Sickle pomfret,OTH,39
+Skipjack tuna,SKJ,693
+Snake mackerel,OTH,2
+Striped marlin,BILL,224
+Swordfish,BILL,247
+Thresher shark,SHARK,1
+Unknown,OTH,2702
+Wahoo,OTH,468
+Yellowfin tuna,YFT,6693
