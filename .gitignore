@@ -2,6 +2,11 @@
 .DS_Store
 .idea/*
 
+image_consolidation/all_images/*
+image_consolidation/csv_labels/*
+image_consolidation/training/images/*
+image_consolidation/validation/images/*
+
 image_preprocessing/images/*
 image_preprocessing/processed_images_vessel1_Daniel/*
 image_preprocessing/processed_images/*
