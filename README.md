@@ -1,9 +1,30 @@
 # 6.883-Final-Project
 
+## project
+
+## dependencies
+- [Mask_RCNN](https://github.com/matterport/Mask_RCNN)
+- tensorflow 1.15
+- keras 2.1.*
+- pandas
+
+
+### directory
+```
+project
+|_data
+  |_annotations
+  |_images
+  |_labels.csv
+|_mask_rcnn.ipynb
+|_mask_rcnn.py
+|_mask_rcnn_coco.h5
+```
+
 ## image_preprocessing
 
 ### dependencies 
-pip install pillow
+- pillow
 
 ### run
 python data_processing.py
