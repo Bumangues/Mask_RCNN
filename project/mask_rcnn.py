@@ -12,7 +12,7 @@ Number_Images = len(listdir('data/images'))
 Fraction_Training_set = 0.9
 
 
-def data_frame_to_json(data_frame, annotations_dir):
+def data_frame_to_pickle(data_frame, annotations_dir):
     img_id = next(data_frame.iterrows())[1][0]
     image_dict = {
         'filename': img_id + '.jpg',
@@ -63,23 +63,19 @@ class HumanInVesselDangerDataset(Dataset):
                 if img_id is current_img_id:
                     # add current row to data frame of same image
                     image_annotations = image_annotations.append(row)
+                    # final image
+                    if i is len(annotations.index) - 1:
+                        # create image's pickle file
+                        data_frame_to_pickle(image_annotations, annotations_dir)
                 # if the current row doesn't belongs to the same image as the previous row
                 elif img_id is not current_img_id:
                     if len(image_annotations.index) > 0:
-                        # create image's csv file
-                        # image_annotations.to_csv(annotations_dir+img_id+'.csv', index=False)
-                        data_frame_to_json(image_annotations, annotations_dir)
+                        data_frame_to_pickle(image_annotations, annotations_dir)
                     # reset variables for next image
                     row_count = 0
                     image_annotations = pd.DataFrame(columns=['img_id', 'x_min', 'x_max', 'y_min', 'y_max', 'label'])
                     image_annotations = image_annotations.append(row)
                     img_id = current_img_id
-                # final image
-                elif i is len(annotations.index)-1:
-                    if len(image_annotations.index) > 0:
-                        # create image's csv file
-                        data_frame_to_json(image_annotations, annotations_dir)
-                        # image_annotations.to_csv(annotations_dir + img_id + '.csv', index=False)
 
                 row_count += 1
 
@@ -89,10 +85,10 @@ class HumanInVesselDangerDataset(Dataset):
             image_id = filename[:-4]
             img_count += 1
             # we are building the train set, 90% of data
-            if is_train and img_count <= len(listdir(images_dir)) * Fraction_Training_set:
+            if is_train and img_count >= len(listdir(images_dir)) * Fraction_Training_set:
                 continue
             # we are building the test/val set, 10% of data
-            if not is_train and img_count > len(listdir(images_dir)) * Fraction_Training_set:
+            if not is_train and img_count < len(listdir(images_dir)) * Fraction_Training_set:
                 continue
             img_path = images_dir + filename
             ann_path = annotations_dir + image_id
