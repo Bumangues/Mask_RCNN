@@ -157,6 +157,7 @@ class VesselConfig(Config):
 
 test_set = HumanInVesselDangerDataset()
 test_set.load_dataset('data/', is_train=False)
+test_set.prepare()
 print('Test: %d' % len(test_set.image_ids))
 
 # # prepare train set
