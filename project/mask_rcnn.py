@@ -9,7 +9,7 @@ import pickle
 
 img_rows, img_cols = 1200, 675
 Number_Images = len(listdir('data/images'))
-Fraction_Training_set = 0.99
+Fraction_Training_set = 0.9
 
 
 def data_frame_to_pickle(data_frame, annotations_dir):
