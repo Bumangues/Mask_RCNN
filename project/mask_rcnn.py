@@ -149,7 +149,7 @@ class VesselConfig(Config):
     # number of classes (background + 2 states)
     NUM_CLASSES = 1 + 2
     # number of training steps per epoch
-    STEPS_PER_EPOCH = 10
+    STEPS_PER_EPOCH = 1
 
 
 # load_test = HumanInVesselDangerDataset()
