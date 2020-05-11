@@ -19,3 +19,7 @@ project/data/images/*
 project/mask_rcnn_coco.h5
 project/.ipynb_checkpoints/*
 
+training/*
+training.zip
+validation/*
+Validation.zip
