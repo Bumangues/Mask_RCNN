@@ -191,15 +191,15 @@ config.display()
 # define the model
 model = MaskRCNN(mode='training', model_dir='./models/', config=config)
 # load weights (mscoco) and exclude the output layers
-model.load_weights('mask_rcnn_coco.h5', by_name=True,
+model.load_weights('models/vessel_cfg20200512T0727/mask_rcnn_vessel_cfg_0004.h5', by_name=True,
                    exclude=["mrcnn_class_logits", "mrcnn_bbox_fc", "mrcnn_bbox", "mrcnn_mask"])
 # train weights (output layers or 'heads')
 model.train(train_set, test_set, learning_rate=config.LEARNING_RATE, epochs=5, layers='heads')
 
 # prepare validation set
-validation_set = HumanInVesselDangerDataset()
-validation_set.load_dataset('validation/', is_validation=True)
-validation_set.prepare()
-print('Validation: %d' % len(validation_set.image_ids))
+# validation_set = HumanInVesselDangerDataset()
+# validation_set.load_dataset('validation/', is_validation=True)
+# validation_set.prepare()
+# print('Validation: %d' % len(validation_set.image_ids))
 # TODO: validate model
 # TODO: display actual vs predicted images
