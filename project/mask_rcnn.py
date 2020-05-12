@@ -166,6 +166,9 @@ class VesselConfig(Config):
     # number of training steps per epoch
     STEPS_PER_EPOCH = 1000
 
+    IMAGES_PER_GPU = 1
+    GPU_COUNT = 8
+
 
 # load_test = HumanInVesselDangerDataset()
 # load_test.load_dataset('data/')
