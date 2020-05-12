@@ -42,7 +42,7 @@ def data_frame_to_pickle(data_frame, annotations_dir):
 # class that defines and loads the dataset
 class HumanInVesselDangerDataset(Dataset):
     # load the dataset definitions
-    def load_dataset(self, dataset_dir, is_train=True):
+    def load_dataset(self, dataset_dir, is_train=True, is_validation=False):
         # define one class
         self.add_class("dataset", 1, "Dangerous")
         self.add_class("dataset", 2, "Safe")
@@ -98,12 +98,13 @@ class HumanInVesselDangerDataset(Dataset):
             # extract image id
             image_id = filename[:-4]
             img_count += 1
-            # we are building the train set, 90% of data
-            if is_train and img_count > len(listdir(images_dir)) * Fraction_Training_set:
-                continue
-            # we are building the test/val set, 10% of data
-            if not is_train and img_count <= len(listdir(images_dir)) * Fraction_Training_set:
-                continue
+            if is_validation is not True:
+                # we are building the train set, 90% of data
+                if is_train and img_count > len(listdir(images_dir)) * Fraction_Training_set:
+                    continue
+                # we are building the test/val set, 10% of data
+                if not is_train and img_count <= len(listdir(images_dir)) * Fraction_Training_set:
+                    continue
             img_path = images_dir + filename
             ann_path = annotations_dir + image_id
             # add to dataset
@@ -188,10 +189,17 @@ print('Test: %d' % len(test_set.image_ids))
 config = VesselConfig()
 config.display()
 # define the model
-model = MaskRCNN(mode='training', model_dir='./', config=config)
+model = MaskRCNN(mode='training', model_dir='./models/', config=config)
 # load weights (mscoco) and exclude the output layers
 model.load_weights('mask_rcnn_coco.h5', by_name=True,
                    exclude=["mrcnn_class_logits", "mrcnn_bbox_fc", "mrcnn_bbox", "mrcnn_mask"])
 # train weights (output layers or 'heads')
 model.train(train_set, test_set, learning_rate=config.LEARNING_RATE, epochs=5, layers='heads')
 
+# prepare validation set
+validation_set = HumanInVesselDangerDataset()
+validation_set.load_dataset('validation/', is_validation=True)
+validation_set.prepare()
+print('Train: %d' % len(validation_set.image_ids))
+# TODO: validate model
+# TODO: display actual vs predicted images
