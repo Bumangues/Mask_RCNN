@@ -49,6 +49,9 @@ class HumanInVesselDangerDataset(Dataset):
         annotations_dir = dataset_dir + 'annotations/'
 
         # if individual csv files for each image haven't been generated
+
+        print("NUM ANNOTATIONS: ", len(listdir(annotations_dir)))
+
         if len(listdir(annotations_dir)) is 0:
             row_count = 0
             # load master csv file with 'img_id', 'x_min', 'x_max', 'y_min', 'y_max' and 'label' columns
@@ -56,8 +59,12 @@ class HumanInVesselDangerDataset(Dataset):
             # create empty data frame
             image_annotations = pd.DataFrame(columns=['img_id', 'x_min', 'x_max', 'y_min', 'y_max', 'label'])
 
+            annotations_dic = {}
+
             img_id = next(annotations.iterrows())[1][0]
             for i, row in annotations.iterrows():
+                annotations_dic[str(row[0])] = 0
+
                 current_img_id = str(row[0])
                 # if the current row belongs to the same image as the previous row
                 if img_id is current_img_id:
@@ -79,7 +86,10 @@ class HumanInVesselDangerDataset(Dataset):
 
                 row_count += 1
 
+            print("ANNOTATIONS DIC LENGTH: ", len(annotations_dic))
+
         img_count = 0
+        count = 0
         for filename in listdir(images_dir):
             # extract image id
             image_id = filename[:-4]
@@ -94,6 +104,9 @@ class HumanInVesselDangerDataset(Dataset):
             ann_path = annotations_dir + image_id
             # add to dataset
             self.add_image('dataset', image_id=image_id, path=img_path, annotation=ann_path, class_ids=[0, 1, 2])
+            count += 1
+
+        print("IMAGES ADDED TO DATASET: ", count)
 
     # extract bounding boxes from an annotation file
     def extract_boxes(self, filename):
