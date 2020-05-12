@@ -6,6 +6,7 @@ from mrcnn.config import Config
 from mrcnn.model import MaskRCNN
 import pandas as pd
 import pickle
+import shutil
 
 img_rows, img_cols = 1200, 675
 Number_Images = len(listdir('data/images'))
@@ -92,6 +93,9 @@ class HumanInVesselDangerDataset(Dataset):
 
             print("ANNOTATIONS DIC LENGTH: ", len(annotations_dic))
 
+            for key, _ in annotations_dic:
+                shutil.copy('data/images/' + key + '.jpg', "data/images_/")
+
         img_count = 0
         count = 0
         for filename in listdir(images_dir):
@@ -104,7 +108,7 @@ class HumanInVesselDangerDataset(Dataset):
             # we are building the test/val set, 10% of data
             if not is_train and img_count < len(listdir(images_dir)) * Fraction_Training_set:
                 continue
-            img_path = images_dir + filename
+            img_path = "data/images_/" + filename
             ann_path = annotations_dir + image_id
             # add to dataset
             self.add_image('dataset', image_id=image_id, path=img_path, annotation=ann_path, class_ids=[0, 1, 2])
