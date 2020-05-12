@@ -163,7 +163,7 @@ class VesselConfig(Config):
     # number of classes (background + 2 states)
     NUM_CLASSES = 1 + 2
     # number of training steps per epoch
-    STEPS_PER_EPOCH = 100
+    STEPS_PER_EPOCH = 1000
 
 
 # load_test = HumanInVesselDangerDataset()
@@ -194,3 +194,4 @@ model.load_weights('mask_rcnn_coco.h5', by_name=True,
                    exclude=["mrcnn_class_logits", "mrcnn_bbox_fc", "mrcnn_bbox", "mrcnn_mask"])
 # train weights (output layers or 'heads')
 model.train(train_set, test_set, learning_rate=config.LEARNING_RATE, epochs=5, layers='heads')
+
