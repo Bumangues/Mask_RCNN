@@ -103,10 +103,10 @@ class HumanInVesselDangerDataset(Dataset):
             image_id = filename[:-4]
             img_count += 1
             # we are building the train set, 90% of data
-            if is_train and img_count >= len(listdir(images_dir)) * Fraction_Training_set:
+            if is_train and img_count > len(listdir(images_dir)) * Fraction_Training_set:
                 continue
             # we are building the test/val set, 10% of data
-            if not is_train and img_count < len(listdir(images_dir)) * Fraction_Training_set:
+            if not is_train and img_count <= len(listdir(images_dir)) * Fraction_Training_set:
                 continue
             img_path = images_dir + filename
             ann_path = annotations_dir + image_id
