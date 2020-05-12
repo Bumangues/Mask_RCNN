@@ -12,7 +12,7 @@ warnings.simplefilter(action="ignore", category=FutureWarning)
 
 img_rows, img_cols = 1200, 675
 Number_Images = len(listdir('data/images'))
-Fraction_Training_set = 0.9
+Fraction_Training_set = 0.66
 
 
 def data_frame_to_pickle(data_frame, annotations_dir):
@@ -194,10 +194,10 @@ config.display()
 # define the model
 model = MaskRCNN(mode='training', model_dir='./models/', config=config)
 # load weights (mscoco) and exclude the output layers
-model.load_weights('models/vessel_cfg20200512T0727/mask_rcnn_vessel_cfg_0004.h5', by_name=True,
+model.load_weights('mask_rcnn_coco.h5', by_name=True,
                    exclude=["mrcnn_class_logits", "mrcnn_bbox_fc", "mrcnn_bbox", "mrcnn_mask"])
 # train weights (output layers or 'heads')
-model.train(train_set, test_set, learning_rate=config.LEARNING_RATE, epochs=10, layers='heads')
+model.train(train_set, test_set, learning_rate=config.LEARNING_RATE, epochs=5, layers='heads')
 
 # prepare validation set
 # validation_set = HumanInVesselDangerDataset()
