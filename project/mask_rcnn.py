@@ -200,6 +200,6 @@ model.train(train_set, test_set, learning_rate=config.LEARNING_RATE, epochs=5, l
 validation_set = HumanInVesselDangerDataset()
 validation_set.load_dataset('validation/', is_validation=True)
 validation_set.prepare()
-print('Train: %d' % len(validation_set.image_ids))
+print('Validation: %d' % len(validation_set.image_ids))
 # TODO: validate model
 # TODO: display actual vs predicted images
