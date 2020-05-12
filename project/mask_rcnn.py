@@ -7,6 +7,8 @@ from mrcnn.model import MaskRCNN
 import pandas as pd
 import pickle
 import shutil
+import warnings
+warnings.simplefilter(action="ignore", category=FutureWarning)
 
 img_rows, img_cols = 1200, 675
 Number_Images = len(listdir('data/images'))
@@ -161,7 +163,7 @@ class VesselConfig(Config):
     # number of classes (background + 2 states)
     NUM_CLASSES = 1 + 2
     # number of training steps per epoch
-    STEPS_PER_EPOCH = 1
+    STEPS_PER_EPOCH = 100
 
 
 # load_test = HumanInVesselDangerDataset()
