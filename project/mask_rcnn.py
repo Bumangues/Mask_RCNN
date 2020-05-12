@@ -45,7 +45,7 @@ class HumanInVesselDangerDataset(Dataset):
         self.add_class("dataset", 1, "Dangerous")
         self.add_class("dataset", 2, "Safe")
         # define data locations
-        images_dir = dataset_dir + 'images/'
+        images_dir = dataset_dir + 'images_/'
         annotations_file = dataset_dir + 'labels.csv'
         annotations_dir = dataset_dir + 'annotations/'
 
@@ -94,7 +94,7 @@ class HumanInVesselDangerDataset(Dataset):
             print("ANNOTATIONS DIC LENGTH: ", len(annotations_dic))
 
             for key, _ in annotations_dic:
-                shutil.copy('data/images/' + key + '.jpg', "data/images_/")
+                shutil.copy('data/images/' + key + '.jpg', images_dir)
 
         img_count = 0
         count = 0
@@ -108,7 +108,7 @@ class HumanInVesselDangerDataset(Dataset):
             # we are building the test/val set, 10% of data
             if not is_train and img_count < len(listdir(images_dir)) * Fraction_Training_set:
                 continue
-            img_path = "data/images_/" + filename
+            img_path = images_dir + filename
             ann_path = annotations_dir + image_id
             # add to dataset
             self.add_image('dataset', image_id=image_id, path=img_path, annotation=ann_path, class_ids=[0, 1, 2])
