@@ -86,6 +86,10 @@ class HumanInVesselDangerDataset(Dataset):
 
                 row_count += 1
 
+            if len(image_annotations) > 0:
+                # create image's pickle file
+                data_frame_to_pickle(image_annotations, annotations_dir)
+
             print("ANNOTATIONS DIC LENGTH: ", len(annotations_dic))
 
         img_count = 0
