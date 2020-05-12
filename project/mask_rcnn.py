@@ -49,10 +49,7 @@ class HumanInVesselDangerDataset(Dataset):
         annotations_file = dataset_dir + 'labels.csv'
         annotations_dir = dataset_dir + 'annotations/'
 
-        # if individual csv files for each image haven't been generated
-
-        print("NUM ANNOTATIONS: ", len(listdir(annotations_dir)))
-
+        # if individual pickle files for each image haven't been generated
         if len(listdir(annotations_dir)) is 0:
             row_count = 0
             # load master csv file with 'img_id', 'x_min', 'x_max', 'y_min', 'y_max' and 'label' columns
@@ -91,13 +88,10 @@ class HumanInVesselDangerDataset(Dataset):
                 # create image's pickle file
                 data_frame_to_pickle(image_annotations, annotations_dir)
 
-            print("ANNOTATIONS DIC LENGTH: ", len(annotations_dic))
-
             for key in annotations_dic:
                 shutil.copy('data/images/' + key + '.jpg', images_dir + key + '.jpg')
 
         img_count = 0
-        count = 0
         for filename in listdir(images_dir):
             # extract image id
             image_id = filename[:-4]
@@ -112,9 +106,6 @@ class HumanInVesselDangerDataset(Dataset):
             ann_path = annotations_dir + image_id
             # add to dataset
             self.add_image('dataset', image_id=image_id, path=img_path, annotation=ann_path, class_ids=[0, 1, 2])
-            count += 1
-
-        print("IMAGES ADDED TO DATASET: ", count)
 
     # extract bounding boxes from an annotation file
     def extract_boxes(self, filename):
@@ -176,28 +167,28 @@ class VesselConfig(Config):
 # load_test = HumanInVesselDangerDataset()
 # load_test.load_dataset('data/')
 
-test_set = HumanInVesselDangerDataset()
-test_set.load_dataset('data/', is_train=False)
-test_set.prepare()
-print('Test: %d' % len(test_set.image_ids))
-
-# # prepare train set
-# train_set = HumanInVesselDangerDataset()
-# train_set.load_dataset('data/', is_train=True)
-# train_set.prepare()
-# print('Train: %d' % len(train_set.image_ids))
-# # prepare test/val set
 # test_set = HumanInVesselDangerDataset()
 # test_set.load_dataset('data/', is_train=False)
 # test_set.prepare()
 # print('Test: %d' % len(test_set.image_ids))
-# # prepare config
-# config = VesselConfig()
-# config.display()
-# # define the model
-# model = MaskRCNN(mode='training', model_dir='./', config=config)
-# # load weights (mscoco) and exclude the output layers
-# model.load_weights('mask_rcnn_coco.h5', by_name=True,
-#                    exclude=["mrcnn_class_logits", "mrcnn_bbox_fc", "mrcnn_bbox", "mrcnn_mask"])
-# # train weights (output layers or 'heads')
-# model.train(train_set, test_set, learning_rate=config.LEARNING_RATE, epochs=5, layers='heads')
+
+# prepare train set
+train_set = HumanInVesselDangerDataset()
+train_set.load_dataset('data/', is_train=True)
+train_set.prepare()
+print('Train: %d' % len(train_set.image_ids))
+# prepare test/val set
+test_set = HumanInVesselDangerDataset()
+test_set.load_dataset('data/', is_train=False)
+test_set.prepare()
+print('Test: %d' % len(test_set.image_ids))
+# prepare config
+config = VesselConfig()
+config.display()
+# define the model
+model = MaskRCNN(mode='training', model_dir='./', config=config)
+# load weights (mscoco) and exclude the output layers
+model.load_weights('mask_rcnn_coco.h5', by_name=True,
+                   exclude=["mrcnn_class_logits", "mrcnn_bbox_fc", "mrcnn_bbox", "mrcnn_mask"])
+# train weights (output layers or 'heads')
+model.train(train_set, test_set, learning_rate=config.LEARNING_RATE, epochs=5, layers='heads')
