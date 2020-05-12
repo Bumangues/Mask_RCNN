@@ -94,7 +94,7 @@ class HumanInVesselDangerDataset(Dataset):
             print("ANNOTATIONS DIC LENGTH: ", len(annotations_dic))
 
             for key in annotations_dic:
-                shutil.copy('data/images/' + key + '.jpg', images_dir)
+                shutil.copy('data/images/' + key + '.jpg', images_dir + key + '.jpg')
 
         img_count = 0
         count = 0
