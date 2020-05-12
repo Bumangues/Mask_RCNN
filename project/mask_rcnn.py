@@ -71,7 +71,7 @@ class HumanInVesselDangerDataset(Dataset):
                     # add current row to data frame of same image
                     image_annotations = image_annotations.append(row)
                     # final image
-                    if i is len(annotations.index) - 1:
+                    if i is len(annotations.index):
                         # create image's pickle file
                         data_frame_to_pickle(image_annotations, annotations_dir)
                 # if the current row doesn't belongs to the same image as the previous row
