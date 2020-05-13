@@ -2,6 +2,8 @@
 .DS_Store
 .idea/*
 
+*.h5
+
 image_consolidation/all_images/*
 image_consolidation/csv_labels/*
 image_consolidation/training/images/*
@@ -16,6 +18,8 @@ keras-yolo3/*
 
 project/data/annotations/*
 project/data/images/*
+project/data/images_/*
+project/data/splashed/*
 project/mask_rcnn_coco.h5
 project/.ipynb_checkpoints/*
 

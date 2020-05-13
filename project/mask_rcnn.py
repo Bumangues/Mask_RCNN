@@ -177,7 +177,7 @@ def evaluate_model(dataset, model, cfg):
         # convert image into one sample
         sample = expand_dims(image, 0)
         # make prediction
-        yhat = model.detect(sample, verbose=0)
+        yhat = model.detect(sample, verbose=1)
         print("gt_bbox:", gt_bbox)
         print("gt_bbox shape:", gt_bbox.shape)
         print("_,.-*-.,_,.-*-.,_,.-*-.,_,.-*-.,_,.-*-.,_,.-*-.,_,.-*-.,_,.-*-.,_,.-*-.,_,.-*-.,_,.-*-.,_,.-*-.,_")
