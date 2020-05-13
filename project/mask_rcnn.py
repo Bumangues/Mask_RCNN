@@ -207,7 +207,8 @@ class VesselEvalConfig(Config):
     # number of classes (background + 2 states)
     NUM_CLASSES = 1 + 2
     IMAGES_PER_GPU = 1
-    GPU_COUNT = 8
+    GPU_COUNT = 1
+
 
 
 # load_test = HumanInVesselDangerDataset()
