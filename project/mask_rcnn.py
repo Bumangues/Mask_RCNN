@@ -3,17 +3,22 @@ from numpy import zeros
 from numpy import asarray
 from numpy import mean
 from numpy import expand_dims
+import numpy as np
 from mrcnn.utils import Dataset
 from mrcnn.config import Config
 from mrcnn.model import MaskRCNN
 from mrcnn.utils import compute_ap
 from mrcnn.model import load_image_gt
 from mrcnn.model import mold_image
+from PIL import Image
 import pandas as pd
 import pickle
 import shutil
 import warnings
-from PIL import Image
+import getopt
+import sys
+import skimage
+import datetime
 
 warnings.simplefilter(action="ignore", category=FutureWarning)
 
@@ -62,53 +67,55 @@ class HumanInVesselDangerDataset(Dataset):
         # define data locations
         images_dir = dataset_dir + 'images_/'
         annotations_file = dataset_dir + 'labels.csv'
-        annotations_dir = dataset_dir + 'annotations/'
+        if is_validation:
+            annotations_dir = dataset_dir + 'annotations/'
+        else:
+            annotations_dir = dataset_dir + 'validation/'
 
         # if individual pickle files for each image haven't been generated
-        if not is_validation:
-            if len(listdir(annotations_dir)) is 0:
-                row_count = 0
-                # load master csv file with 'img_id', 'x_min', 'x_max', 'y_min', 'y_max' and 'label' columns
-                annotations = pd.read_csv(annotations_file, usecols=[0, 2, 3, 4, 5, 8], header=0)
-                # create empty data frame
-                image_annotations = pd.DataFrame(columns=['img_id', 'x_min', 'x_max', 'y_min', 'y_max', 'label'])
+        if len(listdir(annotations_dir)) is 0:
+            row_count = 0
+            # load master csv file with 'img_id', 'x_min', 'x_max', 'y_min', 'y_max' and 'label' columns
+            annotations = pd.read_csv(annotations_file, usecols=[0, 2, 3, 4, 5, 8], header=0)
+            # create empty data frame
+            image_annotations = pd.DataFrame(columns=['img_id', 'x_min', 'x_max', 'y_min', 'y_max', 'label'])
 
-                annotations_dic = {}
+            annotations_dic = {}
 
-                img_id = next(annotations.iterrows())[1][0]
-                for i, row in annotations.iterrows():
-                    annotations_dic[str(row[0])] = 0
+            img_id = next(annotations.iterrows())[1][0]
+            for i, row in annotations.iterrows():
+                annotations_dic[str(row[0])] = 0
 
-                    current_img_id = str(row[0])
-                    # if the current row belongs to the same image as the previous row
-                    if img_id is current_img_id:
-                        # add current row to data frame of same image
-                        image_annotations = image_annotations.append(row)
-                        # final image
-                        if i is len(annotations.index):
-                            # create image's pickle file
-                            data_frame_to_pickle(image_annotations, annotations_dir)
-                    # if the current row doesn't belongs to the same image as the previous row
-                    elif img_id is not current_img_id:
-                        if len(image_annotations.index) > 0:
-                            data_frame_to_pickle(image_annotations, annotations_dir)
-                        # reset variables for next image
-                        row_count = 0
-                        image_annotations = pd.DataFrame(columns=['img_id', 'x_min', 'x_max', 'y_min', 'y_max', 'label'])
-                        image_annotations = image_annotations.append(row)
-                        img_id = current_img_id
+                current_img_id = str(row[0])
+                # if the current row belongs to the same image as the previous row
+                if img_id is current_img_id:
+                    # add current row to data frame of same image
+                    image_annotations = image_annotations.append(row)
+                    # final image
+                    if i is len(annotations.index):
+                        # create image's pickle file
+                        data_frame_to_pickle(image_annotations, annotations_dir)
+                # if the current row doesn't belongs to the same image as the previous row
+                elif img_id is not current_img_id:
+                    if len(image_annotations.index) > 0:
+                        data_frame_to_pickle(image_annotations, annotations_dir)
+                    # reset variables for next image
+                    row_count = 0
+                    image_annotations = pd.DataFrame(columns=['img_id', 'x_min', 'x_max', 'y_min', 'y_max', 'label'])
+                    image_annotations = image_annotations.append(row)
+                    img_id = current_img_id
 
-                    row_count += 1
+                row_count += 1
 
-                if len(image_annotations) > 0:
-                    # create image's pickle file
-                    data_frame_to_pickle(image_annotations, annotations_dir)
+            if len(image_annotations) > 0:
+                # create image's pickle file
+                data_frame_to_pickle(image_annotations, annotations_dir)
 
-                for key in annotations_dic:
-                    if not is_validation:
-                        shutil.copy('data/images/' + key + '.jpg', images_dir + key + '.jpg')
-                    else:
-                        shutil.copy('validation/images/' + key + '.jpg', images_dir + key + '.jpg')
+            for key in annotations_dic:
+                if not is_validation:
+                    shutil.copy('data/images/' + key + '.jpg', images_dir + key + '.jpg')
+                else:
+                    shutil.copy('validation/images/' + key + '.jpg', images_dir + key + '.jpg')
 
         img_count = 0
         for filename in listdir(images_dir):
@@ -210,6 +217,39 @@ def evaluate_model(dataset, model, cfg):
     mAP = mean(APs)
     return mAP
 
+def color_splash(image, mask):
+    """Apply color splash effect.
+    image: RGB image [height, width, 3]
+    mask: instance segmentation mask [height, width, instance count]
+    Returns result image.
+    """
+    # Make a grayscale copy of the image. The grayscale copy still
+    # has 3 RGB channels, though.
+    gray = skimage.color.gray2rgb(skimage.color.rgb2gray(image)) * 255
+    # Copy color pixels from the original color image where mask is set
+    if mask.shape[-1] > 0:
+        # We're treating all instances as one, so collapse the mask into one layer
+        mask = (np.sum(mask, -1, keepdims=True) >= 1)
+        splash = np.where(mask, image, gray).astype(np.uint8)
+    else:
+        splash = gray.astype(np.uint8)
+    return splash
+
+
+def detect_and_color_splash(model, image_path):
+    # Run model detection and generate the color splash effect
+    print("Running on {}".format(image_path))
+    # Read image
+    image = skimage.io.imread(image_path)
+    # Detect objects
+    r = model.detect([image], verbose=1)[0]
+    # Color splash
+    splash = color_splash(image, r['masks'])
+    # Save output
+    file_name = "data/splashed/splash_{:%Y%m%dT%H%M%S}.png".format(datetime.datetime.now())
+    skimage.io.imsave(file_name, splash)
+    print("Saved to ", file_name)
+
 # define a configuration for the model
 class VesselConfig(Config):
     # define the name of the configuration
@@ -218,8 +258,9 @@ class VesselConfig(Config):
     NUM_CLASSES = 1 + 2
     # number of training steps per epoch
     STEPS_PER_EPOCH = 1000
-
+    # number of images per gpu
     IMAGES_PER_GPU = 1
+    # number of gpu's
     GPU_COUNT = 4
 
 
@@ -228,59 +269,122 @@ class VesselEvalConfig(Config):
     NAME = "Vessel_cfg"
     # number of classes (background + 2 states)
     NUM_CLASSES = 1 + 2
+    # number of images per gpu
     IMAGES_PER_GPU = 1
+    # number of gpu's
     GPU_COUNT = 1
-    #IMAGE_MAX_DIM = 1200
 
 
+def main(argv):
+    mode = ''
+    weights = 'mask_rcnn_coco.h5'
+    image = ''
+    dataset = 'data/'
+    try:
+        opts, args = getopt.getopt(argv, 'hm:w:i:d:', ['mode,weights,image,dataset'])
+    except getopt.GetoptError:
+        print('mask_rcnn.py -m <mode=train, eval or splash> -w <weights> -i <image> -d <dataset>')
+        sys.exit()
 
-# load_test = HumanInVesselDangerDataset()
-# load_test.load_dataset('data/')
+    for opt, arg in opts:
+        if opt == '-h':
+            print('mask_rcnn.py -m <mode=train, eval or splash> -w <weights> -i <image> -d <dataset>')
+            sys.exit()
+        elif opt in ('-m', '--mode'):
+            mode = arg
+        elif opt in ('-w', '--weights'):
+            weights = arg
+        elif opt in ('-i', '--image'):
+            image = arg
+        elif opt in ('-d', '--dataset'):
+            dataset = arg
 
-# test_set = HumanInVesselDangerDataset()
-# test_set.load_dataset('data/', is_train=False)
-# test_set.prepare()
-# print('Test: %d' % len(test_set.image_ids))
+    if mode == 'train':
+        print('TRAINING MODE:')
+        print('WITH WEIGHTS: ', weights)
+        # prepare train set
+        train_set = HumanInVesselDangerDataset()
+        train_set.load_dataset('data/', is_train=True)
+        train_set.prepare()
+        print('Train: %d' % len(train_set.image_ids))
+        # prepare test set
+        test_set = HumanInVesselDangerDataset()
+        test_set.load_dataset('data/', is_train=False)
+        test_set.prepare()
+        print('Test: %d' % len(test_set.image_ids))
 
-# prepare train set
-train_set = HumanInVesselDangerDataset()
-train_set.load_dataset('data/', is_train=True)
-train_set.prepare()
-print('Train: %d' % len(train_set.image_ids))
-# prepare test set
-test_set = HumanInVesselDangerDataset()
-test_set.load_dataset('data/', is_train=False)
-test_set.prepare()
-print('Test: %d' % len(test_set.image_ids))
-# # prepare validation set
-# validation_set = HumanInVesselDangerDataset()
-# validation_set.load_dataset('validation/', is_validation=True)
-# validation_set.prepare()
-# print('Validation: %d' % len(validation_set.image_ids))
+        # prepare config
+        config = VesselConfig()
+        config.display()
+        # # define the model
+        model = MaskRCNN(mode='training', model_dir='./models/', config=config)
+        # load weights (mscoco) and exclude the output layers
+        model.load_weights(weights, by_name=True,
+                           exclude=["mrcnn_class_logits", "mrcnn_bbox_fc", "mrcnn_bbox", "mrcnn_mask"])
+        # train weights (output layers or 'heads')
+        model.train(train_set, test_set, learning_rate=config.LEARNING_RATE, epochs=10, layers='heads')
+    elif mode == 'eval':
+        print('EVALUATION MODE:')
+        print('WITH WEIGHTS: ', weights)
+        # prepare train set
+        train_set = HumanInVesselDangerDataset()
+        train_set.load_dataset('data/', is_train=True)
+        train_set.prepare()
+        print('Train: %d' % len(train_set.image_ids))
+        # prepare test set
+        test_set = HumanInVesselDangerDataset()
+        test_set.load_dataset('data/', is_train=False)
+        test_set.prepare()
+        print('Test: %d' % len(test_set.image_ids))
+        # prepare validation set
+        validation_set = HumanInVesselDangerDataset()
+        validation_set.load_dataset('validation/', is_validation=True)
+        validation_set.prepare()
+        print('Validation: %d' % len(validation_set.image_ids))
 
-# prepare config
-config = VesselConfig()
-config.display()
-# # define the model
-model = MaskRCNN(mode='training', model_dir='./models/', config=config)
-# load weights (mscoco) and exclude the output layers
-model.load_weights('mask_rcnn_coco.h5', by_name=True,
-                   exclude=["mrcnn_class_logits", "mrcnn_bbox_fc", "mrcnn_bbox", "mrcnn_mask"])
-# train weights (output layers or 'heads')
-model.train(train_set, test_set, learning_rate=config.LEARNING_RATE, epochs=10, layers='heads')
+        # prepare config
+        config = VesselEvalConfig()
+        config.display()
 
-# # define the model
-# model = MaskRCNN(mode='inference', model_dir='./', config=config)
-# # load model weights
-# model.load_weights('models/vessel_cfg20200512T0727/mask_rcnn_vessel_cfg_0009.h5', by_name=True)
-# # evaluate model on training dataset
-# train_mAP = evaluate_model(train_set, model, config)
-# print("Train mAP: %.3f" % train_mAP)
-# # evaluate model on test dataset
-# test_mAP = evaluate_model(test_set, model, config)
-# print("Test mAP: %.3f" % test_mAP)
-# # evaluate model on validation dataset
-# val_mAP = evaluate_model(validation_set, model, config)
-# print("Validation mAP: %.3f" % val_mAP)
+        # define the model
+        model = MaskRCNN(mode='inference', model_dir='./', config=config)
+        # load model weights
+        model.load_weights(weights, by_name=True)
 
-# TODO: display actual vs predicted images
+        # evaluate model on training dataset
+        train_mAP = evaluate_model(train_set, model, config)
+        print("Train mAP: %.3f" % train_mAP)
+        # evaluate model on test dataset
+        test_mAP = evaluate_model(test_set, model, config)
+        print("Test mAP: %.3f" % test_mAP)
+        # evaluate model on validation dataset
+        val_mAP = evaluate_model(validation_set, model, config)
+        print("Validation mAP: %.3f" % val_mAP)
+    elif mode == 'splash':
+        print("SPLASH MODE: ")
+        if image == '':
+            print('use `-i <loc/of/img>` to splash an image')
+            sys.exit()
+        print('WITH WEIGHTS: ', weights)
+        print('USING DATASET: ', dataset)
+        print('SPLASHING IMAGE: ', image)
+
+        # prepare validation set
+        validation_set = HumanInVesselDangerDataset()
+        validation_set.load_dataset(dataset, is_validation=True)
+        validation_set.prepare()
+        print('Validation: %d' % len(validation_set.image_ids))
+        # prepare config
+        config = VesselEvalConfig()
+        config.display()
+
+        # define the model
+        model = MaskRCNN(mode='inference', model_dir='./', config=config)
+        # load model weights
+        model.load_weights(weights, by_name=True)
+
+        detect_and_color_splash(model, image)
+
+
+if __name__ == "__main__":
+    main(sys.argv[1:])
