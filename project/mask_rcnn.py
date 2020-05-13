@@ -177,18 +177,18 @@ def evaluate_model(dataset, model, cfg):
         # convert image into one sample
         sample = expand_dims(scaled_image, 0)
         # make prediction
-        yhat = model.detect(sample, verbose=1)
+        yhat = model.detect(image, verbose=1)
+
+        print("image_meta: ", image_meta)
         print("gt_bbox:", gt_bbox)
         print("gt_bbox shape:", gt_bbox.shape)
-        print("_,.-*-.,_,.-*-.,_,.-*-.,_,.-*-.,_,.-*-.,_,.-*-.,_,.-*-.,_,.-*-.,_,.-*-.,_,.-*-.,_,.-*-.,_,.-*-.,_")
         print("gt_class_id: ", gt_class_id)
-        print("_,.-*-.,_,.-*-.,_,.-*-.,_,.-*-.,_,.-*-.,_,.-*-.,_,.-*-.,_,.-*-.,_,.-*-.,_,.-*-.,_,.-*-.,_,.-*-.,_")
         print("gt_mask: ", gt_mask.shape)
-        print("_,.-*-.,_,.-*-.,_,.-*-.,_,.-*-.,_,.-*-.,_,.-*-.,_,.-*-.,_,.-*-.,_,.-*-.,_,.-*-.,_,.-*-.,_,.-*-.,_")
-
+        print("-----------------------------------------------")
         # extract results for first sample
         r = yhat[0]
 
+        print(r)
         print("rois: ", r["rois"].shape)
         print("class_ids: ", r["class_ids"])
         print("scores: ",  r["scores"])
