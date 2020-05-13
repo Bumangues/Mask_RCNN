@@ -173,9 +173,9 @@ def evaluate_model(dataset, model, cfg):
         # load image, bounding boxes and masks for the image id
         image, image_meta, gt_class_id, gt_bbox, gt_mask = load_image_gt(dataset, cfg, image_id, use_mini_mask=False)
         # convert pixel values (e.g. center)
-        scaled_image = mold_image(image, cfg)
+        #scaled_image = mold_image(image, cfg)
         # convert image into one sample
-        sample = expand_dims(scaled_image, 0)
+        sample = expand_dims(image, 0)
         # make prediction
         yhat = model.detect(sample, verbose=0)
         print("gt_bbox:", gt_bbox)
