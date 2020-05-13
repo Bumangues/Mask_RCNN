@@ -13,6 +13,8 @@ import pandas as pd
 import pickle
 import shutil
 import warnings
+from PIL import Image
+
 warnings.simplefilter(action="ignore", category=FutureWarning)
 
 img_rows, img_cols = 1200, 675
@@ -26,6 +28,12 @@ def data_frame_to_pickle(data_frame, annotations_dir):
         'filename': img_id + '.jpg',
         'bboxes':   []
     }
+
+    img = Image.open('data/images/' + img_id + '.jpg')
+    w, h = img.size
+
+    image_dict['w'] = w
+    image_dict['h'] = h
 
     # columns = ['img_id', 'x_min', 'x_max', 'y_min', 'y_max', 'label']
     for i, row in data_frame.iterrows():
@@ -212,7 +220,7 @@ class VesselConfig(Config):
     STEPS_PER_EPOCH = 1000
 
     IMAGES_PER_GPU = 1
-    GPU_COUNT = 8
+    GPU_COUNT = 4
 
 
 class VesselEvalConfig(Config):
@@ -244,35 +252,35 @@ test_set = HumanInVesselDangerDataset()
 test_set.load_dataset('data/', is_train=False)
 test_set.prepare()
 print('Test: %d' % len(test_set.image_ids))
-# prepare validation set
-validation_set = HumanInVesselDangerDataset()
-validation_set.load_dataset('validation/', is_validation=True)
-validation_set.prepare()
-print('Validation: %d' % len(validation_set.image_ids))
+# # prepare validation set
+# validation_set = HumanInVesselDangerDataset()
+# validation_set.load_dataset('validation/', is_validation=True)
+# validation_set.prepare()
+# print('Validation: %d' % len(validation_set.image_ids))
 
 # prepare config
 config = VesselEvalConfig()
 config.display()
 # # define the model
-# model = MaskRCNN(mode='training', model_dir='./models/', config=config)
-# # load weights (mscoco) and exclude the output layers
-# model.load_weights('models/vessel_cfg20200512T2115/mask_rcnn_vessel_cfg_0004.h5', by_name=True,
-#                    exclude=["mrcnn_class_logits", "mrcnn_bbox_fc", "mrcnn_bbox", "mrcnn_mask"])
-# # train weights (output layers or 'heads')
-# model.train(train_set, test_set, learning_rate=config.LEARNING_RATE, epochs=10, layers='heads')
+model = MaskRCNN(mode='training', model_dir='./models/', config=config)
+# load weights (mscoco) and exclude the output layers
+model.load_weights('mask_rcnn_coco.h5', by_name=True,
+                   exclude=["mrcnn_class_logits", "mrcnn_bbox_fc", "mrcnn_bbox", "mrcnn_mask"])
+# train weights (output layers or 'heads')
+model.train(train_set, test_set, learning_rate=config.LEARNING_RATE, epochs=10, layers='heads')
 
-# define the model
-model = MaskRCNN(mode='inference', model_dir='./', config=config)
-# load model weights
-model.load_weights('models/vessel_cfg20200512T0727/mask_rcnn_vessel_cfg_0009.h5', by_name=True)
-# evaluate model on training dataset
-train_mAP = evaluate_model(train_set, model, config)
-print("Train mAP: %.3f" % train_mAP)
-# evaluate model on test dataset
-test_mAP = evaluate_model(test_set, model, config)
-print("Test mAP: %.3f" % test_mAP)
-# evaluate model on validation dataset
-val_mAP = evaluate_model(validation_set, model, config)
-print("Validation mAP: %.3f" % val_mAP)
+# # define the model
+# model = MaskRCNN(mode='inference', model_dir='./', config=config)
+# # load model weights
+# model.load_weights('models/vessel_cfg20200512T0727/mask_rcnn_vessel_cfg_0009.h5', by_name=True)
+# # evaluate model on training dataset
+# train_mAP = evaluate_model(train_set, model, config)
+# print("Train mAP: %.3f" % train_mAP)
+# # evaluate model on test dataset
+# test_mAP = evaluate_model(test_set, model, config)
+# print("Test mAP: %.3f" % test_mAP)
+# # evaluate model on validation dataset
+# val_mAP = evaluate_model(validation_set, model, config)
+# print("Validation mAP: %.3f" % val_mAP)
 
 # TODO: display actual vs predicted images
