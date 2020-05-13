@@ -192,7 +192,7 @@ def evaluate_model(dataset, model, cfg):
         # convert image into one sample
         sample = expand_dims(image, 0)
         # make prediction
-        yhat = model.detect(sample, verbose=1)
+        yhat = model.detect(sample, verbose=0)
 
         # extract results for first sample
         r = yhat[0]
