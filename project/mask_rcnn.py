@@ -94,11 +94,11 @@ class HumanInVesselDangerDataset(Dataset):
                     # final image
                     if i is len(annotations.index):
                         # create image's pickle file
-                        data_frame_to_pickle(image_annotations, annotations_dir)
+                        data_frame_to_pickle(image_annotations, annotations_dir, dataset_dir)
                 # if the current row doesn't belongs to the same image as the previous row
                 elif img_id is not current_img_id:
                     if len(image_annotations.index) > 0:
-                        data_frame_to_pickle(image_annotations, annotations_dir)
+                        data_frame_to_pickle(image_annotations, annotations_dir, dataset_dir)
                     # reset variables for next image
                     row_count = 0
                     image_annotations = pd.DataFrame(columns=['img_id', 'x_min', 'x_max', 'y_min', 'y_max', 'label'])
@@ -109,7 +109,7 @@ class HumanInVesselDangerDataset(Dataset):
 
             if len(image_annotations) > 0:
                 # create image's pickle file
-                data_frame_to_pickle(image_annotations, annotations_dir)
+                data_frame_to_pickle(image_annotations, annotations_dir,  dataset_dir)
 
             for key in annotations_dic:
                 if not is_validation:
