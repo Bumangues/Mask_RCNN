@@ -338,7 +338,7 @@ def main(argv):
         print('Test: %d' % len(test_set.image_ids))
         # prepare validation set
         validation_set = HumanInVesselDangerDataset()
-        validation_set.load_dataset('validation/', is_validation=True)
+        validation_set.load_dataset('', is_validation=True)
         validation_set.prepare()
         print('Validation: %d' % len(validation_set.image_ids))
 
