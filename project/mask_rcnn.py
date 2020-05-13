@@ -67,7 +67,7 @@ class HumanInVesselDangerDataset(Dataset):
         # define data locations
         images_dir = dataset_dir + 'images_/'
         annotations_file = dataset_dir + 'labels.csv'
-        if is_validation:
+        if not is_validation:
             annotations_dir = dataset_dir + 'annotations/'
         else:
             annotations_dir = dataset_dir + 'validation/'
