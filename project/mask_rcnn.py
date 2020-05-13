@@ -259,7 +259,7 @@ print('Test: %d' % len(test_set.image_ids))
 # print('Validation: %d' % len(validation_set.image_ids))
 
 # prepare config
-config = VesselEvalConfig()
+config = VesselConfig()
 config.display()
 # # define the model
 model = MaskRCNN(mode='training', model_dir='./models/', config=config)
