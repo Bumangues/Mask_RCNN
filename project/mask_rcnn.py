@@ -201,6 +201,15 @@ class VesselConfig(Config):
     GPU_COUNT = 8
 
 
+class VesselEvalConfig(Config):
+    # define the name of the configuration
+    NAME = "Vessel_cfg"
+    # number of classes (background + 2 states)
+    NUM_CLASSES = 1 + 2
+    IMAGES_PER_GPU = 1
+    GPU_COUNT = 8
+
+
 # load_test = HumanInVesselDangerDataset()
 # load_test.load_dataset('data/')
 
@@ -226,7 +235,7 @@ validation_set.prepare()
 print('Validation: %d' % len(validation_set.image_ids))
 
 # prepare config
-config = VesselConfig()
+config = VesselEvalConfig()
 config.display()
 # # define the model
 # model = MaskRCNN(mode='training', model_dir='./models/', config=config)
