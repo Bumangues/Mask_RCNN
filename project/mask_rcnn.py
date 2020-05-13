@@ -70,7 +70,7 @@ class HumanInVesselDangerDataset(Dataset):
         if not is_validation:
             annotations_dir = dataset_dir + 'annotations/'
         else:
-            annotations_dir = dataset_dir + 'validation/'
+            annotations_dir = dataset_dir + 'annotations/'
 
         # if individual pickle files for each image haven't been generated
         if len(listdir(annotations_dir)) is 0:
@@ -338,7 +338,7 @@ def main(argv):
         print('Test: %d' % len(test_set.image_ids))
         # prepare validation set
         validation_set = HumanInVesselDangerDataset()
-        validation_set.load_dataset('', is_validation=True)
+        validation_set.load_dataset('validation/', is_validation=True)
         validation_set.prepare()
         print('Validation: %d' % len(validation_set.image_ids))
 
