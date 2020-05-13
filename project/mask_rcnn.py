@@ -27,14 +27,14 @@ Number_Images = len(listdir('data/images'))
 Fraction_Training_set = 0.66
 
 
-def data_frame_to_pickle(data_frame, annotations_dir):
+def data_frame_to_pickle(data_frame, annotations_dir, dataset_dir):
     img_id = next(data_frame.iterrows())[1][0]
     image_dict = {
         'filename': img_id + '.jpg',
         'bboxes':   []
     }
 
-    img = Image.open('data/images/' + img_id + '.jpg')
+    img = Image.open(dataset_dir + 'images/' + img_id + '.jpg')
     w, h = img.size
 
     image_dict['w'] = w
