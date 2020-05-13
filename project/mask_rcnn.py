@@ -175,9 +175,9 @@ def evaluate_model(dataset, model, cfg):
         # convert pixel values (e.g. center)
         scaled_image = mold_image(image, cfg)
         # convert image into one sample
-        sample = expand_dims(scaled_image, 0)
+        sample = expand_dims(image, 0)
         # make prediction
-        yhat = model.detect(image, verbose=1)
+        yhat = model.detect(sample, verbose=1)
 
         print("image_meta: ", image_meta)
         print("gt_bbox:", gt_bbox)
