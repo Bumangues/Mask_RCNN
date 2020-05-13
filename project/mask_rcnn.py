@@ -1,9 +1,14 @@
 from os import listdir
 from numpy import zeros
 from numpy import asarray
+from numpy import mean
+from numpy import expand_dims
 from mrcnn.utils import Dataset
 from mrcnn.config import Config
 from mrcnn.model import MaskRCNN
+from mrcnn.utils import compute_ap
+from mrcnn.model import load_image_gt
+from mrcnn.model import mold_image
 import pandas as pd
 import pickle
 import shutil
@@ -157,6 +162,28 @@ class HumanInVesselDangerDataset(Dataset):
         return info['path']
 
 
+# calculate the mAP for a model on a given dataset
+def evaluate_model(dataset, model, cfg):
+    APs = list()
+    for image_id in dataset.image_ids:
+        # load image, bounding boxes and masks for the image id
+        image, image_meta, gt_class_id, gt_bbox, gt_mask = load_image_gt(dataset, cfg, image_id, use_mini_mask=False)
+        # convert pixel values (e.g. center)
+        scaled_image = mold_image(image, cfg)
+        # convert image into one sample
+        sample = expand_dims(scaled_image, 0)
+        # make prediction
+        yhat = model.detect(sample, verbose=0)
+        # extract results for first sample
+        r = yhat[0]
+        # calculate statistics, including AP
+        AP, _, _, _ = compute_ap(gt_bbox, gt_class_id, gt_mask, r["rois"], r["class_ids"], r["scores"], r['masks'])
+        # store
+        APs.append(AP)
+    # calculate the mean AP across all images
+    mAP = mean(APs)
+    return mAP
+
 # define a configuration for the model
 class VesselConfig(Config):
     # define the name of the configuration
@@ -183,26 +210,40 @@ train_set = HumanInVesselDangerDataset()
 train_set.load_dataset('data/', is_train=True)
 train_set.prepare()
 print('Train: %d' % len(train_set.image_ids))
-# prepare test/val set
+# prepare test set
 test_set = HumanInVesselDangerDataset()
 test_set.load_dataset('data/', is_train=False)
 test_set.prepare()
 print('Test: %d' % len(test_set.image_ids))
+# prepare validation set
+validation_set = HumanInVesselDangerDataset()
+validation_set.load_dataset('validation/', is_validation=True)
+validation_set.prepare()
+print('Validation: %d' % len(validation_set.image_ids))
+
 # prepare config
 config = VesselConfig()
 config.display()
-# define the model
-model = MaskRCNN(mode='training', model_dir='./models/', config=config)
-# load weights (mscoco) and exclude the output layers
-model.load_weights('models/vessel_cfg20200512T2115/mask_rcnn_vessel_cfg_0004.h5', by_name=True,
-                   exclude=["mrcnn_class_logits", "mrcnn_bbox_fc", "mrcnn_bbox", "mrcnn_mask"])
-# train weights (output layers or 'heads')
-model.train(train_set, test_set, learning_rate=config.LEARNING_RATE, epochs=10, layers='heads')
+# # define the model
+# model = MaskRCNN(mode='training', model_dir='./models/', config=config)
+# # load weights (mscoco) and exclude the output layers
+# model.load_weights('models/vessel_cfg20200512T2115/mask_rcnn_vessel_cfg_0004.h5', by_name=True,
+#                    exclude=["mrcnn_class_logits", "mrcnn_bbox_fc", "mrcnn_bbox", "mrcnn_mask"])
+# # train weights (output layers or 'heads')
+# model.train(train_set, test_set, learning_rate=config.LEARNING_RATE, epochs=10, layers='heads')
 
-# prepare validation set
-# validation_set = HumanInVesselDangerDataset()
-# validation_set.load_dataset('validation/', is_validation=True)
-# validation_set.prepare()
-# print('Validation: %d' % len(validation_set.image_ids))
-# TODO: validate model
+# define the model
+model = MaskRCNN(mode='inference', model_dir='./', config=config)
+# load model weights
+model.load_weights('models/vessel_cfg20200512T0727/mask_rcnn_vessel_cfg_0009.h5', by_name=True)
+# evaluate model on training dataset
+train_mAP = evaluate_model(train_set, model, config)
+print("Train mAP: %.3f" % train_mAP)
+# evaluate model on test dataset
+test_mAP = evaluate_model(test_set, model, config)
+print("Test mAP: %.3f" % test_mAP)
+# evaluate model on validation dataset
+val_mAP = evaluate_model(validation_set, model, config)
+print("Validation mAP: %.3f" % val_mAP)
+
 # TODO: display actual vs predicted images
