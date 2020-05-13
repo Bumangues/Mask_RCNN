@@ -178,6 +178,8 @@ def evaluate_model(dataset, model, cfg):
         sample = expand_dims(scaled_image, 0)
         # make prediction
         yhat = model.detect(sample, verbose=0)
+        print(gt_bbox, gt_class_id, gt_mask)
+        print(yhat[0])
         # extract results for first sample
         r = yhat[0]
         # calculate statistics, including AP
@@ -208,6 +210,7 @@ class VesselEvalConfig(Config):
     NUM_CLASSES = 1 + 2
     IMAGES_PER_GPU = 1
     GPU_COUNT = 1
+    #IMAGE_MAX_DIM = 1200
 
 
 
