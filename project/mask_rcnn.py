@@ -193,9 +193,9 @@ def evaluate_model(dataset, model, cfg):
         print("class_ids: ", r["class_ids"])
         print("scores: ",  r["scores"])
         print("masks: ", r["masks"])
-        
+
         # calculate statistics, including AP
-        AP, _, _, _ = compute_ap(gt_bbox, gt_class_id, gt_mask, r["rois"], r["class_ids"], r["scores"], r['masks'])
+        AP, _, _, _ = compute_ap(gt_bbox, gt_class_id, gt_mask, r["rois"].shape, r["class_ids"], r["scores"], r['masks'].shape)
         # store
         APs.append(AP)
     # calculate the mean AP across all images
