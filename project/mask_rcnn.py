@@ -65,7 +65,7 @@ class HumanInVesselDangerDataset(Dataset):
         annotations_dir = dataset_dir + 'annotations/'
 
         # if individual pickle files for each image haven't been generated
-        if is_validation:
+        if not is_validation:
             if len(listdir(annotations_dir)) is 0:
                 row_count = 0
                 # load master csv file with 'img_id', 'x_min', 'x_max', 'y_min', 'y_max' and 'label' columns
@@ -132,10 +132,9 @@ class HumanInVesselDangerDataset(Dataset):
         # load and parse the file
         with open(filename, 'rb') as f:
             img_info = pickle.load(f)
+            w = img_info["w"]
+            h = img_info["h"]
         boxes = list()
-
-        w = img_info["w"]
-        h = img_info["h"]
 
         for box in img_info["bboxes"]:
             name = int(box['name'])
