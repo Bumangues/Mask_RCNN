@@ -134,6 +134,9 @@ class HumanInVesselDangerDataset(Dataset):
             img_info = pickle.load(f)
         boxes = list()
 
+        w = img_info["w"]
+        h = img_info["h"]
+
         for box in img_info["bboxes"]:
             name = int(box['name'])
             xmin = int(box['x_min'])
@@ -143,14 +146,12 @@ class HumanInVesselDangerDataset(Dataset):
             coors = [xmin, ymin, xmax, ymax, name]
             boxes.append(coors)
         f.close()
-        return boxes
+        return boxes, w, h
 
     # load the masks for an image
     def load_mask(self, image_id):
-        h = img_rows
-        w = img_cols
         image_info = self.image_info[image_id]
-        boxes = self.extract_boxes(image_info['annotation'])
+        boxes, w, h = self.extract_boxes(image_info['annotation'])
         # create one array for all masks, each on a different channel
         masks = zeros([h, w, len(boxes)], dtype='uint8')
         # create masks
