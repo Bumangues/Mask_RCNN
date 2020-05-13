@@ -194,20 +194,8 @@ def evaluate_model(dataset, model, cfg):
         # make prediction
         yhat = model.detect(sample, verbose=1)
 
-        print("image_meta: ", image_meta)
-        print("gt_bbox:", gt_bbox)
-        print("gt_bbox shape:", gt_bbox.shape)
-        print("gt_class_id: ", gt_class_id)
-        print("gt_mask: ", gt_mask.shape)
-        print("-----------------------------------------------")
         # extract results for first sample
         r = yhat[0]
-
-        print(r)
-        print("rois: ", r["rois"].shape)
-        print("class_ids: ", r["class_ids"])
-        print("scores: ",  r["scores"])
-        print("masks: ", r["masks"].shape)
 
         # calculate statistics, including AP
         AP, _, _, _ = compute_ap(gt_bbox, gt_class_id, gt_mask, r["rois"], r["class_ids"], r["scores"], r['masks'])
