@@ -178,10 +178,22 @@ def evaluate_model(dataset, model, cfg):
         sample = expand_dims(scaled_image, 0)
         # make prediction
         yhat = model.detect(sample, verbose=0)
-        print(gt_bbox, gt_class_id, gt_mask)
-        print(yhat[0])
+        print("gt_bbox:", gt_bbox)
+        print("gt_bbox shape:", gt_bbox.shape)
+        print("_,.-*-.,_,.-*-.,_,.-*-.,_,.-*-.,_,.-*-.,_,.-*-.,_,.-*-.,_,.-*-.,_,.-*-.,_,.-*-.,_,.-*-.,_,.-*-.,_")
+        print("gt_class_id: ", gt_class_id)
+        print("_,.-*-.,_,.-*-.,_,.-*-.,_,.-*-.,_,.-*-.,_,.-*-.,_,.-*-.,_,.-*-.,_,.-*-.,_,.-*-.,_,.-*-.,_,.-*-.,_")
+        print("gt_mask: ", gt_mask.shape)
+        print("_,.-*-.,_,.-*-.,_,.-*-.,_,.-*-.,_,.-*-.,_,.-*-.,_,.-*-.,_,.-*-.,_,.-*-.,_,.-*-.,_,.-*-.,_,.-*-.,_")
+
         # extract results for first sample
         r = yhat[0]
+
+        print("rois: ", r["rois"])
+        print("class_ids: ", r["class_ids"])
+        print("scores: ",  r["scores"])
+        print("masks: ", r["masks"])
+        
         # calculate statistics, including AP
         AP, _, _, _ = compute_ap(gt_bbox, gt_class_id, gt_mask, r["rois"], r["class_ids"], r["scores"], r['masks'])
         # store
