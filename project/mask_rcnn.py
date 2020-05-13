@@ -96,14 +96,17 @@ class HumanInVesselDangerDataset(Dataset):
                 data_frame_to_pickle(image_annotations, annotations_dir)
 
             for key in annotations_dic:
-                shutil.copy('data/images/' + key + '.jpg', images_dir + key + '.jpg')
+                if not is_validation:
+                    shutil.copy('data/images/' + key + '.jpg', images_dir + key + '.jpg')
+                else:
+                    shutil.copy('validation/images/' + key + '.jpg', images_dir + key + '.jpg')
 
         img_count = 0
         for filename in listdir(images_dir):
             # extract image id
             image_id = filename[:-4]
             img_count += 1
-            if is_validation is not True:
+            if not is_validation:
                 # we are building the train set, 90% of data
                 if is_train and img_count > len(listdir(images_dir)) * Fraction_Training_set:
                     continue
