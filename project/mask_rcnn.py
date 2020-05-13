@@ -57,49 +57,50 @@ class HumanInVesselDangerDataset(Dataset):
         annotations_dir = dataset_dir + 'annotations/'
 
         # if individual pickle files for each image haven't been generated
-        if len(listdir(annotations_dir)) is 0:
-            row_count = 0
-            # load master csv file with 'img_id', 'x_min', 'x_max', 'y_min', 'y_max' and 'label' columns
-            annotations = pd.read_csv(annotations_file, usecols=[0, 2, 3, 4, 5, 8], header=0)
-            # create empty data frame
-            image_annotations = pd.DataFrame(columns=['img_id', 'x_min', 'x_max', 'y_min', 'y_max', 'label'])
+        if is_validation:
+            if len(listdir(annotations_dir)) is 0:
+                row_count = 0
+                # load master csv file with 'img_id', 'x_min', 'x_max', 'y_min', 'y_max' and 'label' columns
+                annotations = pd.read_csv(annotations_file, usecols=[0, 2, 3, 4, 5, 8], header=0)
+                # create empty data frame
+                image_annotations = pd.DataFrame(columns=['img_id', 'x_min', 'x_max', 'y_min', 'y_max', 'label'])
 
-            annotations_dic = {}
+                annotations_dic = {}
 
-            img_id = next(annotations.iterrows())[1][0]
-            for i, row in annotations.iterrows():
-                annotations_dic[str(row[0])] = 0
+                img_id = next(annotations.iterrows())[1][0]
+                for i, row in annotations.iterrows():
+                    annotations_dic[str(row[0])] = 0
 
-                current_img_id = str(row[0])
-                # if the current row belongs to the same image as the previous row
-                if img_id is current_img_id:
-                    # add current row to data frame of same image
-                    image_annotations = image_annotations.append(row)
-                    # final image
-                    if i is len(annotations.index):
-                        # create image's pickle file
-                        data_frame_to_pickle(image_annotations, annotations_dir)
-                # if the current row doesn't belongs to the same image as the previous row
-                elif img_id is not current_img_id:
-                    if len(image_annotations.index) > 0:
-                        data_frame_to_pickle(image_annotations, annotations_dir)
-                    # reset variables for next image
-                    row_count = 0
-                    image_annotations = pd.DataFrame(columns=['img_id', 'x_min', 'x_max', 'y_min', 'y_max', 'label'])
-                    image_annotations = image_annotations.append(row)
-                    img_id = current_img_id
+                    current_img_id = str(row[0])
+                    # if the current row belongs to the same image as the previous row
+                    if img_id is current_img_id:
+                        # add current row to data frame of same image
+                        image_annotations = image_annotations.append(row)
+                        # final image
+                        if i is len(annotations.index):
+                            # create image's pickle file
+                            data_frame_to_pickle(image_annotations, annotations_dir)
+                    # if the current row doesn't belongs to the same image as the previous row
+                    elif img_id is not current_img_id:
+                        if len(image_annotations.index) > 0:
+                            data_frame_to_pickle(image_annotations, annotations_dir)
+                        # reset variables for next image
+                        row_count = 0
+                        image_annotations = pd.DataFrame(columns=['img_id', 'x_min', 'x_max', 'y_min', 'y_max', 'label'])
+                        image_annotations = image_annotations.append(row)
+                        img_id = current_img_id
 
-                row_count += 1
+                    row_count += 1
 
-            if len(image_annotations) > 0:
-                # create image's pickle file
-                data_frame_to_pickle(image_annotations, annotations_dir)
+                if len(image_annotations) > 0:
+                    # create image's pickle file
+                    data_frame_to_pickle(image_annotations, annotations_dir)
 
-            for key in annotations_dic:
-                if not is_validation:
-                    shutil.copy('data/images/' + key + '.jpg', images_dir + key + '.jpg')
-                else:
-                    shutil.copy('validation/images/' + key + '.jpg', images_dir + key + '.jpg')
+                for key in annotations_dic:
+                    if not is_validation:
+                        shutil.copy('data/images/' + key + '.jpg', images_dir + key + '.jpg')
+                    else:
+                        shutil.copy('validation/images/' + key + '.jpg', images_dir + key + '.jpg')
 
         img_count = 0
         for filename in listdir(images_dir):
