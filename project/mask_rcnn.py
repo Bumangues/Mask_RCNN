@@ -326,16 +326,6 @@ def main(argv):
     elif mode == 'eval':
         print('EVALUATION MODE:')
         print('WITH WEIGHTS: ', weights)
-        # prepare train set
-        train_set = HumanInVesselDangerDataset()
-        train_set.load_dataset('data/', is_train=True)
-        train_set.prepare()
-        print('Train: %d' % len(train_set.image_ids))
-        # prepare test set
-        test_set = HumanInVesselDangerDataset()
-        test_set.load_dataset('data/', is_train=False)
-        test_set.prepare()
-        print('Test: %d' % len(test_set.image_ids))
         # prepare validation set
         validation_set = HumanInVesselDangerDataset()
         validation_set.load_dataset('validation/', is_validation=True)
@@ -351,12 +341,6 @@ def main(argv):
         # load model weights
         model.load_weights(weights, by_name=True)
 
-        # evaluate model on training dataset
-        train_mAP = evaluate_model(train_set, model, config)
-        print("Train mAP: %.3f" % train_mAP)
-        # evaluate model on test dataset
-        test_mAP = evaluate_model(test_set, model, config)
-        print("Test mAP: %.3f" % test_mAP)
         # evaluate model on validation dataset
         val_mAP = evaluate_model(validation_set, model, config)
         print("Validation mAP: %.3f" % val_mAP)
